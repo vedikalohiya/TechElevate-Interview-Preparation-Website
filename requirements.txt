@@ -1,5 +1,5 @@
 Flask
-Flask-PyMongo
+flask-pymongo
 Flask-Cors
-Werkzeug
 gunicorn
+Werkzeug
