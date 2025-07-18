@@ -7,11 +7,9 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 app.secret_key = '7fa97ae2ee731f742f0760d3042b3c57'  # Needed for sessions to work
+app.config["MONGO_URI"] = "mongodb+srv://vedikalohiya22:vedikalohiya22@cluster0.qsau4qk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 
-# Load MongoDB URI from environment variable
-app.config["MONGO_URI"] = os.environ.get("MONGO_URI")
-mongo = PyMongo(app)
-
+# === ROUTES ===
 @app.route('/')
 def index():
     return render_template('register.html')
@@ -34,7 +32,6 @@ def show_profile():
     if not user:
         return redirect(url_for('signin'))
 
-    user_name = user.get('name', 'User')  # Fix: define user_name
     return render_template('profile.html', user_name=user_name)
 
 @app.route('/dashboard')
@@ -43,6 +40,7 @@ def show_dashboard():
     if not user_name:
         return redirect(url_for('signin'))
     return render_template('dash.html', user_name=user_name)
+
 
 @app.route('/mockstart')
 def start_mock():
@@ -173,6 +171,7 @@ def signup():
     mongo.db.users.insert_one(user_data)
     return jsonify({'status': 'success', 'message': 'User registered successfully.'}), 201
 
+# === LOGIN API ===
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -186,10 +185,11 @@ def login():
     if user and check_password_hash(user['password'], password):
         session['user_email'] = email
         session['user_name'] = user['name']
+        user_name = session.get('user_name')
         return jsonify({'status': 'success', 'message': 'Login successful.', 'redirect': '/home'}), 200
     else:
         return jsonify({'status': 'fail', 'message': 'Invalid credentials.'}), 401
 
-# === Run only in local dev ===
+# === RUN APP ===
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
